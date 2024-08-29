@@ -21,6 +21,7 @@ W.generate_Links_from_csv("matsim/links.csv")
 data = pd.read_csv('matsim/bus.csv')
 # 按线路ID分组
 lines = data.groupby('id')
+
 # 循环每一条公交线路
 for line_id, stops in lines:
     print(f"线路: {line_id}")
@@ -29,12 +30,13 @@ for line_id, stops in lines:
         current_time = start_time
         # 按顺序模拟每一站之间的行驶
         for i in range(len(stops) - 1):
+            #过一分钟就到下一个站点
             current_stop = stops.iloc[i]
             next_stop = stops.iloc[i + 1]
             W.adddemand_point2point(
                     float(current_stop['x']), float(current_stop['y']),
                     float(next_stop['x']), float(next_stop['y']),
-                    float(current_time), 
+                    float(current_time),
                     float(current_time)+W.DELTAT,
                     flow=1
                 )
@@ -45,7 +47,7 @@ csv_file = 'matsim/population_time_converted.csv'
 # 打开CSV文件
 with open(csv_file, 'r', encoding='utf-8') as csvfile:
     reader = csv.DictReader(csvfile)
-    
+
     # 获取总行数以便初始化进度条
     total_lines = sum(1 for row in csv.reader(open(csv_file))) - 1  # 减去标题行
 
@@ -58,10 +60,11 @@ with open(csv_file, 'r', encoding='utf-8') as csvfile:
                 W.adddemand_point2point(
                     float(row['x1']), float(row['y1']),
                     float(row['x2']), float(row['y2']),
-                    float(row['end_time1_seconds']), 
+                    float(row['end_time1_seconds']),
                     float(row['end_time1_seconds'])+W.DELTAT,
                     flow=1
                 )
+                #晚高峰车辆
                 # W.adddemand_point2point(
                 #     float(row['x2']), float(row['y2']),
                 #     float(row['x3']), float(row['y3']),
