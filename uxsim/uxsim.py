@@ -56,7 +56,7 @@ class Node:
         #ノード位置（可視化用）
         s.x = x
         s.y = y
-        
+
         #流入・流出リンク
         s.inlinks = {}
         s.outlinks = {}
@@ -152,16 +152,16 @@ class Node:
         outlinks0 = list(s.outlinks.values())
         if len(outlinks0):
             for i in range(sum([l.lanes for l in outlinks0])):
-                if len(s.generation_queue) > 0:                    
+                if len(s.generation_queue) > 0:
                     veh = s.generation_queue[0]
 
                     #consider the link preferences
                     outlinks = list(s.outlinks.values())
-                    if set(outlinks) & set(veh.links_prefer): 
+                    if set(outlinks) & set(veh.links_prefer):
                         outlinks = list(set(outlinks) & set(veh.links_prefer))
                     if set(outlinks) & set(veh.links_avoid):
                         outlinks = list(set(outlinks) - set(veh.links_avoid))
-                    
+
                     preference = [veh.route_pref[l] for l in outlinks]
                     if sum(preference) > 0:
                         outlink = random.choices(outlinks, preference)[0]
@@ -220,20 +220,20 @@ class Node:
                 outlinks.append(outlink)
         random.shuffle(outlinks)
 
-        for outlink in outlinks: 
+        for outlink in outlinks:
             if (len(outlink.vehicles) < outlink.lanes or outlink.vehicles[-outlink.lanes].x > outlink.delta_per_lane*s.W.DELTAN) and outlink.capacity_in_remain >= s.W.DELTAN and s.flow_capacity_remain >= s.W.DELTAN:
                 #受け入れ可能かつ流出可能の場合，リンク優先度に応じて選択
                 vehs = [
-                    veh for veh in s.incoming_vehicles 
+                    veh for veh in s.incoming_vehicles
                     if veh == veh.link.vehicles[0] and #送り出しリンクで先頭車線の車両
                     veh.route_next_link == outlink and #行先リンクが受け入れリンク
                     (s.signal_phase in veh.link.signal_group or len(s.signal)<=1) and #信号が合致
                     veh.link.capacity_out_remain >= s.W.DELTAN
-                ] 
+                ]
                 if len(vehs) == 0:
                     continue
                 veh = random.choices(vehs, [veh.link.merge_priority for veh in vehs])[0] #車線の少ないリンクは，車線の多いリンクの試行回数の恩恵を受けて少し有利になる．大きな差はでないので許容する
-                
+
                 inlink = veh.link
 
                 #累積台数関連更新
@@ -261,7 +261,7 @@ class Node:
                     veh.lane = (outlink.vehicles[-1].lane + 1)%outlink.lanes
                 else:
                     veh.lane = 0
-                
+
                 veh.leader = None
                 if len(outlink.vehicles) >= outlink.lanes:
                     veh.leader = outlink.vehicles[-outlink.lanes]
@@ -327,7 +327,7 @@ class Link:
             The length of the link.
         free_flow_speed : float, optional
             The free flow speed on the link, default is 20.
-        jam_density : float, optional  
+        jam_density : float, optional
             The jam density on the link, default is 0.2. If jam_density_per_lane is specified, this value is ignored.
         jam_density_per_lane : float, optional
             The jam density per lane on the link. If specified, it overrides the jam_density value.
@@ -392,36 +392,36 @@ class Link:
 
         Parameter Adjustments:
         - Some traffic flow model parameters like `free_flow_speed`, `jam_density`, `capacity_out`, `capacity_in`, and `merge_priority` can be altered during simulation to reflect changing conditions.
-            
+
         Details on Multi-lane model:
         - Link model:
             - Multiple lanes with single-pipe model. FIFO is guaranteed per link. No lane changing.
-            - Links have a `lanes` attribute representing the number of lanes. 
+            - Links have a `lanes` attribute representing the number of lanes.
             - Each vehicle has a `lane` attribute.
             - Each vehicle follows the leader vehicle in the same lane, i.e., the vehicle `lanes` steps ahead on the link.
-        - Node model: 
+        - Node model:
             - Sending links:
                 - Vehicles in all lanes at the downstream end of the link have the right to be sent out.
                 - However, to ensure link FIFO, vehicles are tried to be sent out in the order they entered the link. If a vehicle cannot be accepted, the outflow from that link stops.
-            - Receiving links:  
+            - Receiving links:
                 - All lanes at the upstream end of the link can accept vehicles.
 
         Details on Fundamental diagram parameters (*: input, **: alternative input):
         - *free_flow_speed (m/s)
-        - *jam_density (veh/m/LINK)  
+        - *jam_density (veh/m/LINK)
         - **jam_density_per_lane (veh/m/lane)
-        - *lanes, number_of_lane (lane) 
+        - *lanes, number_of_lane (lane)
         - tau: y-intercept of link FD (s/veh*LINK)
-        - REACTION_TIME (s/veh*lane) 
+        - REACTION_TIME (s/veh*lane)
         - w (m/s)
         - capacity (veh/s/LINK)
         - capacity_per_lane (veh/s/lane)
         - delta: minimum spacing (m/veh*LINK)
-        - delta_per_lane: minimum spacing in lane (m/veh*lane) 
+        - delta_per_lane: minimum spacing in lane (m/veh*lane)
         - q_star: capacity (veh/s/LINK)
         - k_star: critical density (veh/s/LINK)
         - *capacity_in, capacity_out: bottleneck capacity at beginning/end of link (veh/s/LINK)
-        - *Node.flow_capacity: node flow capacity (veh/s/LINK-LIKE) 
+        - *Node.flow_capacity: node flow capacity (veh/s/LINK-LIKE)
         """
 
         s.W = W
@@ -436,7 +436,7 @@ class Link:
         s.lanes = int(number_of_lanes)
         if s.lanes != number_of_lanes:
             raise ValueError(f"number_of_lanes must be an integer. Got {number_of_lanes} at {s}.")
-        
+
 
         #フローモデルパラメータ:per link
         s.u = free_flow_speed
@@ -1525,7 +1525,7 @@ class World:
             origs.append(W.get_nearest_node(x_orig, y_orig))
         if len(dests) == 0:
             dests.append(W.get_nearest_node(x_dest, y_dest))
-        
+
         if flow != -1:
             flow = flow/(len(origs)*len(dests))
         if volume != -1:
@@ -1533,7 +1533,7 @@ class World:
         for o in origs:
             for d in dests:
                 W.adddemand(o, d, t_start, t_end, flow, volume, attribute)
-    
+
     def finalize_scenario(W, tmax=None):
         """
         Finalizes the settings and preparations for the simulation scenario execution.
@@ -1601,7 +1601,7 @@ class World:
         W.sim_start_time = time.time()
         W.print("simulating...")
 
-    def exec_simulation(W, until_t=None, duration_t=None):
+    def exec_simulation(W, until_t: object = None, duration_t: object = None) -> object:
         """
         Execute the main loop of the simulation.
 
@@ -1653,6 +1653,10 @@ class World:
         if end_ts < start_ts:
             raise Exception("exec_simulation error: Simulation duration is negative. Check until_t or duration_t")
 
+        execution_record={"Time":[]}
+        for link in W.LINKS:
+            execution_record[link.name]=[]
+
         #メインループ
         for W.T in range(start_ts, end_ts):
             if W.T == 0:
@@ -1685,6 +1689,15 @@ class World:
 
             if W.print_mode and W.show_progress and W.T%W.show_progress_deltat_timestep == 0 and W.T > 0:
                 W.analyzer.show_simulation_progress()
+
+            execution_record["Time"].append(W.TIME)
+            for link in W.LINKS:
+                execution_record[link.name].append(link.num_vehicles)
+
+        # 使用pandas创建DataFrame
+        excel_output = pd.DataFrame(execution_record)
+        excel_output.to_excel('execution_record.xlsx', index=False)
+        print("Complete writing flow data to excel.")
 
         if W.T == W.TSIZE-1:
             if W.print_mode and W.show_progress:
