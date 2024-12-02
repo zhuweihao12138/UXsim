@@ -1880,8 +1880,8 @@ class World:
         with open(fname) as f:
             for r in csv.reader(f):
                 if r[3] != "length":
-                    W.addLink(r[0], r[1], r[2], length=float(r[3]), free_flow_speed=float(r[4]), merge_priority=float(r[6]),number_of_lanes=float(r[8]))
-                    # W.addLink(r[0], r[1], r[2], length=float(r[3]), free_flow_speed=float(r[4]))
+                    # W.addLink(r[0], r[1], r[2], length=float(r[3]), free_flow_speed=float(r[4]), merge_priority=float(r[6]),number_of_lanes=float(r[8]))
+                    W.addLink(r[0], r[1], r[2], length=float(r[3]), free_flow_speed=float(r[4]))
     def generate_demand_from_csv(W, fname):
         """
         Generate demand in the network from a CSV file.
